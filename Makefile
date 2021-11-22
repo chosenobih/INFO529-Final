@@ -2,7 +2,9 @@
 PWD := $(shell pwd)
 
 default:
-	echo Default rule
+	@echo Use one of these targets:
+	@echo web -- pull the nginx server and start the web server as a daemon
+	
 
 # These targets work only on Ubuntu
 
