@@ -1,0 +1,13 @@
+How to run the webserver:
+-------------------------
+
+make web
+
+You can access the web page by visiting this URL http://localhost:8080
+
+How to add content to the webserver:
+------------------------------------
+
+The webserver serves up files from the content directory.
+
+
