@@ -1,0 +1,1 @@
+This folder houses the developmental code that the UI team has been producing for the project. It might be a bit messy, but it's better than nothing.
