@@ -12,15 +12,22 @@ import pydeck
 import meshio
 import streamlit.components.v1 as components
 import open3d as o3d
+from pathlib import Path
+import sys
 
-## Import the data (need to get Public Link)
-# command = 'wget https://de.cyverse.org/data/ds/iplant/home/shared/phytooracle/season_10_lettuce_yr_2020/level_3/flirIrCamera/season10_plant_clustering/s10_flir_rgb_clustering_v4.csv'
-# subprocess.call(command, shell = True)
 
 ## ------------------------------------- RGB and Thermal Data ---------------------------------
+# Checks to see if the file is already in the working directory
+path_to_file = 's10_flir_rgb_clustering_v4.csv'
+path = Path(path_to_file)
 
+if path.is_file():
+    print('#### CSV is already in working directory ####')
+else:
+    subprocess.call(f'wget https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_3/flirIrCamera/season10_plant_clustering/{path_to_file}', shell = True)
+
+# Reads in the specified csv file
 df = pd.read_csv('s10_flir_rgb_clustering_v4.csv')
-#df = pd.read_csv('https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_3/flirIrCamera/season10_plant_clustering/s10_flir_rgb_clustering_v4.csv')
 
 df['date'] = pd.to_datetime(df['date'])
 df['date'] = [d.date() for d in df["date"]]
@@ -82,6 +89,7 @@ def getPointsNpz(npz_file):
 ## OPEN3D
 def getPointsO3d(plyFile):
     pcd = o3d.io.read_point_cloud(plyFile)
+    #down_pcd = pcd.voxel_down_sample(voxel_size=0.01)
     
     points = np.asarray(pcd.points)
     colors = np.asarray(pcd.colors)
@@ -99,9 +107,18 @@ def getPointsO3d(plyFile):
     return points_df
 
 def getVis(plantIn):
-        ## Loading in .npz file
-        pcd_df = getPointsO3d(f'/Volumes/LaCie/{plantIn}/combined_multiway_registered.ply')
-        
+        # Checks if point cloud is already in the working directory
+        path_to_pcd = (f'{plantIn}.ply')
+        path = Path(path_to_pcd)
+
+        if path.is_file():
+            print('#### Point Cloud is already in working directory ####')
+        else:
+            subprocess.call(f'wget -O {plantIn}.ply https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_1/scanner3DTop/recent_changes/2020-03-02/plantcrop/combined_pointclouds/{plantIn}/combined_multiway_registered.ply', shell=True)
+
+        ## Loading in point cloud
+        pcd_df = getPointsO3d(path_to_pcd)
+
         print(pcd_df)
 
         target = [pcd_df["x"].mean(), pcd_df["y"].mean(), pcd_df["z"].mean()]
