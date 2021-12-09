@@ -1,8 +1,8 @@
 ## Update
 
 streamlit==1.2.0
-pandas==1.3.4
-numpy==1.21.2
+pandas==1.1.5
+numpy==1.19.5
 seaborn==0.11.2
 pydeck==0.7.1
 meshio==4.4.6
