@@ -1,6 +1,6 @@
 '''
 Authors: Austin Connick, Ryan Rizzo
-File: This file scraps cyverse for date and plant names and builds and tests 
+File: This file scraps cyverse for dates and plant names and builds and tests 
 public links
 Note: has not been tested on more than one date but should still find any
 if they exist
@@ -36,8 +36,8 @@ def getAllDates(url):
     os.system("touch plants_date")
     err = os.system("ils " + url +" >> plants_date")
     if err != 0:
-        print("error " + str(err))
-        os._exit(1)
+        print("error or no subdirectories" + str(err))
+        #os._exit(1)
         return []
     #add rex to find data
     fp = open('plants_date','r')
@@ -61,8 +61,8 @@ def build_names(names):
     os.system("touch plants_name")
     err = os.system("ils " + sub_url_path +" >> plants_name")
     if err != 0:
-        print("error " + str(err))
-        os._exit(1)
+        print("error or no subdirectories" + str(err))
+        #os._exit(1)
         return []
     fp = open("plants_name", 'r')
     all_names = []
@@ -110,6 +110,7 @@ def build_public_link_All(plant_names,plant_date):
     return map_plant_to_public_link
 
 #this is just for testing
+'''
 def main():
    time1 = time.time()
    #gets a list of all dates in data store
@@ -125,3 +126,4 @@ def main():
    print("time-> "+str(total)+"s")
 if __name__=="__main__":
     main()
+'''
