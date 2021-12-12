@@ -54,31 +54,34 @@ df_names = pd.read_csv('2020-03-02_hull_volumes.csv')
 
 names = pd.DataFrame(df_names['plant_name'].sort_values())
 
-#names = pd.read_csv('2020-03-02_plant_name.csv')
-
 ## ------------------------------------------ PS2 Data ----------------------------------------
 
+
 ## Grabs the PS2 csv files, downloads the data, uncompresses it, and concatenates it all into one file
-path_to_file = 'ps2Top-fluorescence_aggregation_S10.tar.gz'
+path_to_file = 'fluorescence_out.csv'
 path = Path(path_to_file)
 
 if path.is_file():
-    print('#### Plant Name CSV is already in working directory ####')
+    print('#### Fluorescence CSV is already in working directory ####')
 else:
-    subprocess.call(f'wget https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_2/ps2Top/{path_to_file}', shell=True)
-    subprocess.call(f'tar -xzvf {path_to_file}', shell=True)
-    subprocess.call(f'rm {path_to_file}', shell=True)
+    subprocess.call(f'wget https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_2/ps2Top/ps2Top-fluorescence_aggregation_S10.tar.gz', shell=True)
+    subprocess.call(f'tar -xzvf ps2Top-fluorescence_aggregation_S10.tar.gz', shell=True)
+    subprocess.call(f'rm ps2Top-fluorescence_aggregation_S10.tar.gz', shell=True)
 
-df_list = []
+    df_list = []
 
-for csv in glob.glob('./fluorescence_outs/*/*.csv'):
-    temp_df = pd.read_csv(csv)
-    date = os.path.basename(csv).split('_')[0]
-    temp_df['date'] = pd.to_datetime(date)
+    for csv in glob.glob('./fluorescence_outs/*/*.csv'):
+        fluor_df = pd.read_csv(csv)
+        date = os.path.basename(csv).split('_')[0]
+        fluor_df['date'] = pd.to_datetime(date)
 
-    df_list.append(temp_df)
+        df_list.append(fluor_df)
     
-PS2_df = pd.concat(df_list)
+    PS2_df = pd.concat(df_list)
+
+    PS2_df.to_csv('fluorescence_out.csv')
+
+PS2_df = pd.read_csv('fluorescence_out.csv')
 
 subprocess.call('rm -r fluorescence_outs', shell=True)
 
@@ -151,8 +154,6 @@ def getVis(plantIn):
         ## Loading in point cloud
         pcd_df = getPointsO3d(path_to_pcd)
 
-        print(pcd_df)
-
         target = [pcd_df["x"].mean(), pcd_df["y"].mean(), pcd_df["z"].mean()]
 
         ## Sets poing cloud layer details (note the RGB ordering was switched to get a green point cloud)
@@ -215,39 +216,40 @@ def season10_menu():
     speciesIn = st.sidebar.selectbox(
         "Species",
         ("Lettuce", ""))
-    nameIn = st.sidebar.text_input("Plant Number")
+    #nameIn = st.sidebar.text_input("Plant Number")
     #displays full dropdown menu if no name has been entered
-    if(nameIn == ""):
-        dateIn = st.sidebar.selectbox(
-            "Date",
-            (df['date'].unique()))
-        genoIn = st.sidebar.selectbox(
-            "Genotype",
-            (df['genotype'].unique()))
-        st.sidebar.write('Select Treatment(s)')
-        treat1 = st.sidebar.checkbox('Treatment 1')
-        treat2 = st.sidebar.checkbox('Treatment 2')
-        treat3 = st.sidebar.checkbox('Treatment 3')
-        #[TO-DO] update the conditions for the options that appear
-        #for the plant number dropdown to include new input widgets
-        plantIn = st.sidebar.selectbox(
-        "Plant Number",
-        (names[names['plant_name'].str.contains(genoIn) == True]['plant_name'].sort_values().unique()))
-    #if a plant name has been entered, displays only the dates for that plant
-    else:
-        #[TO-DO] Need to connect the options of this dropdown to
-        #nameIn from the textbox. Currently it's still displaying
-        #the same dates as the main dropdown
-        dateIn = st.selectbox(
+    #if(nameIn == ""):
+    dateIn = st.sidebar.selectbox(
         "Date",
         (df['date'].unique()))
-        plantIn = nameIn
+    genoIn = st.sidebar.selectbox(
+        "Genotype",
+        (df['genotype'].unique()))
+    st.sidebar.write('Select Treatment(s)')
+    treat1 = st.sidebar.checkbox('Treatment 1')
+    treat2 = st.sidebar.checkbox('Treatment 2')
+    treat3 = st.sidebar.checkbox('Treatment 3')
+    #[TO-DO] update the conditions for the options that appear
+    #for the plant number dropdown to include new input widgets
+    plantIn = st.sidebar.selectbox(
+    "Plant Number",
+    (names[names['plant_name'].str.contains(genoIn) == True]['plant_name'].sort_values().unique()))
+    #if a plant name has been entered, displays only the dates for that plant
+    # else:
+    #     #[TO-DO] Need to connect the options of this dropdown to
+    #     #nameIn from the textbox. Currently it's still displaying
+    #     #the same dates as the main dropdown
+    #     dateIn = st.selectbox(
+    #     "Date",
+    #     (df['date'].unique()))
+    #     plantIn = nameIn
     
     return plantIn, dateIn
 #st.markdown writes text onto the page
 st.markdown("# ACIC Visualization Mockup")
 st.markdown('***')
 
+st.markdown(f"## Individual Plant Level Data")
 #st.columns(n) creates n equally spaced columns on the page 
 col1, col2 = st.columns(2)
 
@@ -263,7 +265,7 @@ with col1:
         st.markdown("Other Seasons Not Implemented")
 
     visualizationHTML = getVis(plantIn)
-    components.html(visualizationHTML, height=650)
+    components.html(visualizationHTML, height=850)
 
   ## ------------------------------------------------------------------------------------
 
@@ -272,7 +274,8 @@ with col2:
     #writes text as header of the graph
     #st.header("Individual Plant")
     ## ------------------------- Individual Graph Bounding Area --------------------------------
-    st.markdown(f"### {plantIn} Bounding Area ($m^2$)")
+    st.markdown('')
+    st.markdown(f"### {plantIn} RGB")
     
     ## Make graph
     ind_df = df[df['plant_name'] == plantIn]
@@ -284,7 +287,7 @@ with col2:
     st.plotly_chart(fig, use_column_width=True)
 
     ## ------------------------- Individual Graph Median Temp --------------------------------
-    st.markdown(f"### {plantIn} Median Temperature (Kelvin)")
+    st.markdown(f"### {plantIn} Thermal")
     
     ## Make graph
     ind_df = df[df['plant_name'] == plantIn]
@@ -295,7 +298,9 @@ with col2:
     ## Add graph to streamlit
     st.plotly_chart(fig_temp, use_column_width=True)
 
-    ## New Columns
+## New Columns
+st.markdown(f"## Season Level Data")
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -333,7 +338,6 @@ with col3:
 ## ------------------------------------ Field Point Cloud -----------------------------------
 ## Full-field Point Cloud
 col1 = st.columns(1)
-st.markdown("### Whole Field Point Cloud")
 
 ## Downloads subsampled point cloud
 path_to_file = 'Lettuce_Reduced_4.ply'
@@ -361,14 +365,12 @@ points_df['r'] = colors_df['r']*255
 points_df['g'] = colors_df['g']*255
 points_df['b'] = colors_df['b']*255
 
-print(points_df)
-
 pcd_df = getPointsO3d(f'{plantIn}.ply')
-concat_df = pd.concat([pcd_df, points_df])
-print(concat_df)
-target = [concat_df["x"].mean(), concat_df["y"].mean(), concat_df["z"].mean()]
+concat_df = pd.concat([points_df, pcd_df])
 
-#target = [points_df["x"].mean(), points_df["y"].mean(), points_df["z"].mean()]
+#target = [concat_df["x"].mean(), concat_df["y"].mean(), concat_df["z"].mean()]
+
+target = [pcd_df["x"].mean(), pcd_df["y"].mean(), pcd_df["z"].mean()]
 
 point_cloud_layer = pydeck.Layer(
     "PointCloudLayer",
@@ -382,7 +384,7 @@ point_cloud_layer = pydeck.Layer(
 )
 
 ## Sets view settings
-view_state = pydeck.ViewState(target=target, rotation_x=90, rotation_orbit=90, controller=True, zoom=2.0, min_zoom=1.0)
+view_state = pydeck.ViewState(target=target, rotation_x=90, rotation_orbit=90, controller=True, zoom=11.0, min_zoom=1.0)
 view = pydeck.View(type="OrbitView", controller=True)
 
 ## Converts the point cloud layer into html
