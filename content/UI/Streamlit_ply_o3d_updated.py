@@ -221,7 +221,7 @@ col1, col2 = st.columns(2)
 
 ## adds content to col2
 with col2:
-    st.header("PointCloud")
+    st.header("Point Cloud")
     plantIn = ""
     seasonIn = st.selectbox(
         "Seasons",
@@ -306,6 +306,7 @@ with col3:
 ## ------------------------------------ Field Point Cloud -----------------------------------
 ## Full-field Point Cloud
 col1 = st.columns(1)
+st.markdown("### Whole Field Point Cloud")
 
 ## Downloads subsampled point cloud
 path_to_file = 'Lettuce_Reduced_4.ply'
