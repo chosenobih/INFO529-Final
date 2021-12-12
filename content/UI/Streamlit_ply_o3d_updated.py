@@ -15,6 +15,7 @@ from pathlib import Path
 import sys
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
 
 ## ------------------------------------- RGB and Thermal Data ---------------------------------
@@ -58,20 +59,28 @@ names = pd.DataFrame(df_names['plant_name'].sort_values())
 ## ------------------------------------------ PS2 Data ----------------------------------------
 
 ## Grabs the PS2 csv files, downloads the data, uncompresses it, and concatenates it all into one file
-# subprocess.call('wget https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_2/ps2Top/ps2Top-fluorescence_aggregation_S10.tar.gz', shell=True)
-# subprocess.call('tar -xzvf ps2Top-fluorescence_aggregation_S10.tar.gz', shell=True)
-# subprocess.call('rm ps2Top-fluorescence_aggregation_S10.tar.gz', shell=True)
+path_to_file = 'ps2Top-fluorescence_aggregation_S10.tar.gz'
+path = Path(path_to_file)
 
-# df_list = []
+if path.is_file():
+    print('#### Plant Name CSV is already in working directory ####')
+else:
+    subprocess.call(f'wget https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_2/ps2Top/{path_to_file}', shell=True)
+    subprocess.call(f'tar -xzvf {path_to_file}', shell=True)
+    subprocess.call(f'rm {path_to_file}', shell=True)
 
-# for csv in glob.glob('./fluorescence_outs/*/*.csv'):
-#     temp_df = pd.read_csv(csv)
-#     date = os.path.basename(csv).split('_')[0]
-#     temp_df['date'] = pd.to_datetime(date)
+df_list = []
 
-#     df_list.append(temp_df)
+for csv in glob.glob('./fluorescence_outs/*/*.csv'):
+    temp_df = pd.read_csv(csv)
+    date = os.path.basename(csv).split('_')[0]
+    temp_df['date'] = pd.to_datetime(date)
+
+    df_list.append(temp_df)
     
-# PS2_df = pd.concat(df_list)
+PS2_df = pd.concat(df_list)
+
+subprocess.call('rm -r fluorescence_outs', shell=True)
 
 ## -------------------------------------- 3D Point Cloud Data ---------------------------------
 ## Preps PLY Point Cloud using MESHIO
@@ -173,32 +182,55 @@ def getVis(plantIn):
 #text that appears on the browser tab as far as I know)
 #icon makes the icon on the browser tab into a chart emoji
 st.set_page_config(
-        page_title = "ACIC Vizualization Mockup",
+        page_title = "ACIC Visualization Mockup",
         page_icon = "chart_with_upwards_trend",
         layout = "wide"
     )
+
+# Markdowns for navigation bar
+st.markdown('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">', unsafe_allow_html=True)
+st.markdown("""
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark" style="background-color: #3498DB;">
+  <a class="navbar-brand" href="" target="_blank">ACIC Visualization</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link disabled" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://docs.google.com/presentation/d/1n4rBY-etIXbz8YGpJCuD_ApuPK9HVBVE5y4iKCzBezU/edit?usp=sharing" target="_blank">Documentation</a> 
+      </li>
+    </ul>
+  </div>
+</nav>
+""", unsafe_allow_html=True)
+
 #dropdown menues for season10 (currently the only season we have to implement)
 #returns a string indicating the plant that should be implemented 
 def season10_menu():
     plantIn = ""
-    speciesIn = st.selectbox(
+    speciesIn = st.sidebar.selectbox(
         "Species",
         ("Lettuce", ""))
-    nameIn = st.text_input("Plant Number")
+    nameIn = st.sidebar.text_input("Plant Number")
     #displays full dropdown menu if no name has been entered
     if(nameIn == ""):
-        dateIn = st.selectbox(
+        dateIn = st.sidebar.selectbox(
             "Date",
             (df['date'].unique()))
-        genoIn = st.selectbox(
+        genoIn = st.sidebar.selectbox(
             "Genotype",
             (df['genotype'].unique()))
-        treat1 = st.checkbox('Treatment 1')
-        treat2 = st.checkbox('Treatment 2')
-        treat3 = st.checkbox('Treatment 3')
+        st.sidebar.write('Select Treatment(s)')
+        treat1 = st.sidebar.checkbox('Treatment 1')
+        treat2 = st.sidebar.checkbox('Treatment 2')
+        treat3 = st.sidebar.checkbox('Treatment 3')
         #[TO-DO] update the conditions for the options that appear
         #for the plant number dropdown to include new input widgets
-        plantIn = st.selectbox(
+        plantIn = st.sidebar.selectbox(
         "Plant Number",
         (names[names['plant_name'].str.contains(genoIn) == True]['plant_name'].sort_values().unique()))
     #if a plant name has been entered, displays only the dates for that plant
@@ -213,33 +245,30 @@ def season10_menu():
     
     return plantIn, dateIn
 #st.markdown writes text onto the page
-st.markdown("# ACIC Vizualization Mockup")
+st.markdown("# ACIC Visualization Mockup")
 st.markdown('***')
 
 #st.columns(n) creates n equally spaced columns on the page 
 col1, col2 = st.columns(2)
 
-## adds content to col2
-with col2:
-    st.header("Point Cloud")
+with col1:
+    st.header("3D PointCloud")
     plantIn = ""
-    seasonIn = st.selectbox(
+    seasonIn = st.sidebar.selectbox(
         "Seasons",
         ("Season 10", ""))
     if(seasonIn == "Season 10"):
         plantIn, dateIn = season10_menu()
     else:
         st.markdown("Other Seasons Not Implemented")
-    st.markdown("### 3D Point Cloud")
 
-    ## Visualizes point cloud
     visualizationHTML = getVis(plantIn)
     components.html(visualizationHTML, height=650)
 
   ## ------------------------------------------------------------------------------------
 
-##adds content to col1
-with col1:
+##adds content to col2
+with col2:
     #writes text as header of the graph
     #st.header("Individual Plant")
     ## ------------------------- Individual Graph Bounding Area --------------------------------
@@ -285,11 +314,9 @@ with col2:
     st.markdown("### PS2")
     
     ## Plotly Graph
-    mean = df.groupby(['date', 'treatment']).mean().reset_index()
+    fig_fluor = px.box(PS2_df, x = "date", y = 'FV/FM', width=600, height=400)
 
-    fig = px.line(mean, x = "date", y = 'bounding_area_m2', color = 'treatment', width=550, height=400)
-
-    st.plotly_chart(fig, use_column_width=True)
+    st.plotly_chart(fig_fluor, use_column_width=True)
 
     ## ------------------------------------ Thermal Graph --------------------------------------
 with col3:
