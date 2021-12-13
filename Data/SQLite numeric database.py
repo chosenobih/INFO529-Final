@@ -14,6 +14,7 @@ import pandas as pd
 import os
 import glob
 import subprocess as sp
+from update_and_build_links import build_public_link, build_map
 
 
 # Create a dataframe from the rgb/thermal data csv stored on cyverse
@@ -43,20 +44,40 @@ psII_df = pd.concat(psII_list)
 psII_df = psII_df.set_index(['Plot', 'date'])
 
 # Preparing the rgb/thermal data frame for merging
+# HASHMAP = build_map()
 
-s10['date'] = pd.to_datetime(s10['date'])
+def add_link(ser):
+    # date = ser.index
+    date = ser.name[1]
+    plant_name = ser['plant_name']
+    try:
+        return build_public_link(plant_name,date)
+    except:
+        print(f'could not built link for: {date} {plant_name}')
+        return ''
+
+
+
+
+# s10['date'] = pd.to_datetime(s10['date'])
+
+
+
 # Remove all border plants because they did not undergo treatments and won't be analyzed futher
 s10 = s10[s10['treatment']!='border']
 # Remove all rows with 'NA' plant names or "Border" plants
-s10.query('plant_name != "NA" and not plant_name.contains("Border")', inplace=True)
+s10.query('plant_name not in ("NA", "na", "nan", None) and not "Border" in plant_name', inplace=True) 
 # Reformat names of 'Plot' column for easier merging with PSII data
 s10['Plot'] = s10['plot'].str.replace('_', ' ')
+
+del s10['plot']
 # Set index to tupule of Plot and date columns in order to merge with PSII data
 s10 = s10.set_index(['Plot', 'date'])
 
 # Join the two data frames on the basis of their indices (Plot and date)
 s10 = s10.join(psII_df)
 
+s10['Public Urls'] = s10.apply(add_link, axis=1)
 # Add the merged data frame as a table in a sqlite database
 
 # Open a connection to a new database
@@ -64,15 +85,13 @@ conn = sql.connect('test.db')
 
 # Create a table in that database, does not need to be repeated unless the data has changed
 # Comment this out after the first time you run it, otherwise you will get an error
-s10.to_sql('s10_new', conn)
+s10.to_sql('s10_new', conn, if_exists='replace')
 
 # Test Queries
 # Query the database, in this case read the data from all columns of the s10_total table in the database (recreating the original dataframe)
 test1 = pd.read_sql('SELECT * FROM s10_new WHERE Plot == "MAC Field Scanner Season 10 Range 18 Column 28"', conn)
 print(test1)
-test2 = pd.read_sql('SELECT * FROM s10_new WHERE plant_name == "Rex_43"', conn)
+test2 = pd.read_sql('SELECT "Public URLs" FROM s10_new WHERE plant_name == "Rex_43"', conn)
 print(test2)
 
-# Returns the whole database file
-return test.db
 
