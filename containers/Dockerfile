@@ -36,6 +36,9 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8501
 
+RUN apt-get update
+RUN apt-get install ffmpeg libsm6 libxext6  -y
+
 RUN apt-get -y install locales && locale-gen en_US.UTF-8
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' 
