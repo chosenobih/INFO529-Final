@@ -58,7 +58,7 @@ psII_df
 # Preparing the rgb/thermal data frame for merging
 s10['date'] = pd.to_datetime(s10['date'])
 s10 = s10[s10['treatment']!='border']
-# Drop any na files from plant_name
+s10.query('plant_name != "NA" and not plant_name.contains("Border")', inplace=True)
 s10['Plot'] = s10['plot'].str.replace('_', ' ')
 del s10['plot']
 s10 = s10.set_index(['Plot', 'date'])
