@@ -19,4 +19,4 @@ The class was divided into functional groups with graduate students serving  as 
   - Evangelizers/Documentation
 
 ### Product documentation
-Click [final docuementation](https://jordane.gitbook.io/user-manual/)
+Click [final documentation](https://jordane.gitbook.io/user-manual/)
