@@ -202,7 +202,7 @@ st.markdown("""
         <a class="nav-link disabled" href="#">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="https://docs.google.com/presentation/d/1n4rBY-etIXbz8YGpJCuD_ApuPK9HVBVE5y4iKCzBezU/edit?usp=sharing" target="_blank">Documentation</a> 
+        <a class="nav-link" href="https://jordane.gitbook.io/user-manual/" target="_blank">Documentation</a> 
       </li>
     </ul>
   </div>
