@@ -14,7 +14,10 @@ import subprocess
 import re
 import time
 import requests
-import bs4
+#import threading
+
+
+#import bs4
 from bs4 import BeautifulSoup
 url = "https://data.cyverse.org/dav-anon/iplant/projects/phytooracle/season_10_lettuce_yr_2020/level_1/scanner3DTop/recent_changes/"
 file_to_find = "/combined_multiway_registered.npy"
@@ -32,7 +35,7 @@ def getAllDates():
     for i in dates:
         #print(i.text)
         i = str(i.text).split("/")[0]
-        print(i)
+        #print(i)
         list_of_dates.append(i)
     return list_of_dates
     #print(domtree.text)
@@ -53,6 +56,25 @@ def build_names(date):
         dates_list.append(i)
     return dates_list
 '''
+builds a hashmap of dates to a list of name and public link for all dates
+returns hashmap
+'''
+def build_map():
+    full_data_set = {}
+    #gets all dates from cyverse
+    plant_dates = getAllDates()
+    for i in plant_dates:
+        #list of names
+        names_of_plants = build_names(i)
+        list_of_links = []
+        for k in names_of_plants:
+            link = build_public_link(k,i)
+            tmp = [k, link]
+            list_of_links.append(tmp)
+ 
+        full_data_set[i] = list_of_links
+    return full_data_set
+'''
 sets starting path
 '''
 def set_path(url_set):
@@ -69,18 +91,25 @@ returns string
 def build_public_link(plant_name,plant_date):
     mid = url+"/"+plant_date+"/plantcrop/combined_pointclouds/"+plant_name
     test_link = mid + file_to_find
-    link_code = requests.get(test_link, stream=True).status_code
+    #this is to slow 
+    #link_code = requests.get(test_link, stream=True).status_code
+    link_code = 200
     if link_code == 404:
         print('invalid link')
+        #print("Name = "+plant_name+" Date = "+plant_date)
         return ''
     else:
         return test_link
 '''
 def main():
-   dateL = getAllDates()
-   names = build_names(dateL[0])
+   tmp = build_map()
+   print(tmp.keys())
+   print(tmp['2020-01-22'])
+
+   #dateL = getAllDates()
+   #names = build_names(dateL[0])
    #print(build_public_link(names[0],dateL[1]))
-   print(names)
+   #print(names)
 if __name__=="__main__":
     main()
 '''
