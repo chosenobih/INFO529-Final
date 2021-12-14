@@ -31,8 +31,9 @@ The class was divided into functional groups with graduate students serving  as 
   ```
   
   Once the docker builds and runs successfully, the Web Application can be accessed using the following link:
+  ```
   http://localhost:8501/
-  
+  ```
   Additional: $docker pull give1up1no1option/ista429final:1.0 (pull the container from docker hub)
 ### Product documentation
 Click [final documentation](https://jordane.gitbook.io/user-manual/)
