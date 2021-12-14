@@ -34,6 +34,6 @@ The class was divided into functional groups with graduate students serving  as 
   ```
   http://localhost:8501/
   ```
-  Additional: $docker pull give1up1no1option/ista429final:1.0 (pull the container from docker hub)
+  
 ### Product documentation
 Click [final documentation](https://jordane.gitbook.io/user-manual/)
