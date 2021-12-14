@@ -37,11 +37,11 @@ Python script that produces a Streamlit web application that visualizes 3D point
 
 ## Graphs
 
-### {Plant Number} Bounding Area (m2):
+### {Plant Number} RGB:
 *	Interactive plotly line graph showing the bounding area for the plant selected in the drop downs
 *	Includes a red dashed line to indicate the day being rendered
 
-### (Plant Number} Median Temperature (Kelvin):
+### (Plant Number} Thermal:
 *	Interactive plotly line graph showing the median canopy temperature for the plant selected in the drop downs
 *	Includes a red dashed line to indicate the day being rendered
 
