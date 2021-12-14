@@ -18,12 +18,20 @@ The class was divided into functional groups with graduate students serving  as 
   - Cyberinfrastructure
   - Evangelizers/Documentation
 
-### Running Containers:
-  - git clone <> ( cloing the githiub repo)
-  - cd /containes
-  - $make (This will build the image for you)
-  - $docker run -p 8501:8501 final (This will run the image final)
-  - http://localhost:8501/ (Link to view the running script)
+### Running Containers on Local Computer:
+  
+  ### Docker
+  ```
+  docker run -p 8501:8501 give1up1no1option/ista429final:1.0
+  ```
+  
+  ### Singularity
+  ```
+  singularity run docker://give1up1no1option/ista429final:1.0
+  ```
+  
+  Once the docker builds and runs successfully, the Web Application can be accessed using the following link:
+  http://localhost:8501/
   
   Additional: $docker pull give1up1no1option/ista429final:1.0 (pull the container from docker hub)
 ### Product documentation
