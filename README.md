@@ -18,5 +18,13 @@ The class was divided into functional groups with graduate students serving  as 
   - Cyberinfrastructure
   - Evangelizers/Documentation
 
+### Running Containers:
+  > git clone <> ( cloing the githiub repo)
+  > cd /containes
+  > $make (This will build the image for you)
+  > $docker run -p 8501:8501 final (This will run the image final)
+  > http://localhost:8501/ (Link to view the running script)
+  
+  Additional: $docker pull give1up1no1option/ista429final:1.0 (pull the container from docker hub)
 ### Product documentation
 Click [final documentation](https://jordane.gitbook.io/user-manual/)
