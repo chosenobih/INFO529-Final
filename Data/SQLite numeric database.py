@@ -44,24 +44,11 @@ psII_df = pd.concat(psII_list)
 psII_df = psII_df.set_index(['Plot', 'date'])
 
 # Preparing the rgb/thermal data frame for merging
-# HASHMAP = build_map()
+HASHMAP = build_map()
+print(HASHMAP.keys())
+# print(HASHMAP[list(HASHMAP.keys())[1]])
 
-def add_link(ser):
-    # date = ser.index
-    date = ser.name[1]
-    plant_name = ser['plant_name']
-    try:
-        return build_public_link(plant_name,date)
-    except:
-        print(f'could not built link for: {date} {plant_name}')
-        return ''
-
-
-
-
-# s10['date'] = pd.to_datetime(s10['date'])
-
-
+s10['date'] = pd.to_datetime(s10['date'])
 
 # Remove all border plants because they did not undergo treatments and won't be analyzed futher
 s10 = s10[s10['treatment']!='border']
@@ -77,8 +64,29 @@ s10 = s10.set_index(['Plot', 'date'])
 # Join the two data frames on the basis of their indices (Plot and date)
 s10 = s10.join(psII_df)
 
-s10['Public Urls'] = s10.apply(add_link, axis=1)
+s10 = s10.reset_index().set_index(['date', 'plant_name'])
+
+# print(s10.head())
+
+
+#FORMING THE DF FROM THE HASHMAP
+hashmap_new = []
+
+for date in HASHMAP:
+    
+    for plant_data in HASHMAP.get(date):
+        # setting up the hashmap array where I have three elements: date, plant_name, url
+        hashmap_new.append([(date)] + plant_data)
+
+hashmap_new = pd.DataFrame(hashmap_new, columns = ['date', 'plant_name', 'public_url'])
+
+hashmap_new['date'] = pd.to_datetime(hashmap_new['date'])
+
+hashmap_new = hashmap_new.set_index(['date','plant_name'])
+
+
 # Add the merged data frame as a table in a sqlite database
+s10 = s10.join(hashmap_new)
 
 # Open a connection to a new database
 conn = sql.connect('test.db')
@@ -91,7 +99,19 @@ s10.to_sql('s10_new', conn, if_exists='replace')
 # Query the database, in this case read the data from all columns of the s10_total table in the database (recreating the original dataframe)
 test1 = pd.read_sql('SELECT * FROM s10_new WHERE Plot == "MAC Field Scanner Season 10 Range 18 Column 28"', conn)
 print(test1)
-test2 = pd.read_sql('SELECT "Public URLs" FROM s10_new WHERE plant_name == "Rex_43"', conn)
+test2 = pd.read_sql('SELECT * FROM s10_new WHERE plant_name == "Rex_43"', conn)
 print(test2)
 
+#counting 
+url_counts = s10['public_url'].value_counts(ascending=True)
+# url_counts.drop(labels = [None], inplace=True)
+relevant_indices = url_counts.iloc[:-1].sum()
+
+# test3 = s10.loc[relevant_indices]
+print(relevant_indices)
+print(len(hashmap_new))
+
+#UNCOMMENT BELOW: CURRENTLY fails but maybe it's supposed to?
+
+# assert len(hashmap_new) == relevant_indices
 
