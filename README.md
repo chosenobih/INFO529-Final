@@ -36,4 +36,4 @@ The class was divided into functional groups with graduate students serving  as 
   ```
   
 ### Product documentation
-Click [final documentation](https://jordane.gitbook.io/user-manual/)
+Click [Project Documentation](https://jordane.gitbook.io/user-manual/)
